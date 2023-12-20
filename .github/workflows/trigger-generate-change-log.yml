@@ -13,7 +13,7 @@ jobs:
       - name: Trigger Generate Change Log
         uses: actions/github-script@v7
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          github-token: ${{ secrets.MY_PROJECT_TOKEN }}
           script: |
             try {
               // Fetch the workflow run ID from the completed workflow
