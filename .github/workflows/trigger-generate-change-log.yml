@@ -24,7 +24,7 @@ jobs:
               const workflowRunID = github.context?.client_payload?.workflow_run_id;
 
               if (!workflowRunID) {
-                console.log("Workflow run ID not found. Exiting.", github.context);
+                console.log("Workflow run ID not found. Exiting.", github);
                 return;
               }
 
