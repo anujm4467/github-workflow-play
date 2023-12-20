@@ -30,7 +30,6 @@ jobs:
             const body = [
               process.env.RELEASE_NAME,
               'Job initiated at ' + new Date(),
-              // Add other release information
             ];
 
             try {

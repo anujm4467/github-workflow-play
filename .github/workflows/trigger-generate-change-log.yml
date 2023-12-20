@@ -1,0 +1,36 @@
+name: Trigger Generate Change Log
+
+on:
+  workflow_run:
+    workflows: ['Create Release Tag']
+    types:
+      - completed
+
+jobs:
+  trigger-generate-change-log:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Generate Change Log
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            try {
+              // Fetch the workflow run ID from the completed workflow
+              const workflowRunID = github.context.payload.workflow_run.id;
+
+              // Trigger the Generate Change Log workflow
+              const response = await github.actions.createWorkflowDispatch({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                workflow_id: 'generate-change-log.yml', // Adjust the workflow filename
+                ref: 'main', // Change to your branch name
+                inputs: {
+                  workflow_run_id: workflowRunID.toString(),
+                },
+              });
+
+              console.log(`Generate Change Log workflow triggered: ${response.status}`);
+            } catch (error) {
+              core.setFailed(error.message);
+            }
