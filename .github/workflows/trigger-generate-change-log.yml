@@ -17,14 +17,19 @@ jobs:
           script: |
             try {
               // Fetch the workflow run ID from the completed workflow
-              const workflowRunID = github.context.payload.workflow_run.id;
+              const workflowRunID = github.context.payload?.workflow_run?.id;
+
+              if (!workflowRunID) {
+                console.log("Workflow run ID not found. Exiting.", github.context.payload);
+                return;
+              }
 
               // Trigger the Generate Change Log workflow
               const response = await github.actions.createWorkflowDispatch({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
-                workflow_id: 'change-log.yml', 
-                ref: 'main', 
+                workflow_id: 'generate-change-log.yml', // Adjust the workflow filename
+                ref: 'main', // Change to your branch name
                 inputs: {
                   workflow_run_id: workflowRunID.toString(),
                 },
