@@ -80,7 +80,7 @@ jobs:
           RELEASE_DATE=$(echo '${{ steps.get-jobs-data.outputs.result }}' | jq '.build_start_time' -r )
           TESTS_URL=$(echo '${{ steps.get-jobs-data.outputs.result }}' | jq '.qa_link' -r )
           APPROVED_BY="${{ steps.get-approvals-data.outputs.result }}"
-          RELEASE_NAME="DM Web Release "$(date "+%m/%d/%Y %H:%M:%S")
+          RELEASE_NAME="Web Release "$(date "+%m/%d/%Y %H:%M:%S")
           RELEASE_TAG="rel_"$(date "+%y_%m_%d")"_dm"
           WORKFLOW_URL="https://github.com/${GITHUB_REPOSITORY}/actions/runs/${WORKFLOW_RUN_ID}"
           WORKFLOW_TITLE="🚀 Deploy Action: ${WORKFLOW_URL}"
