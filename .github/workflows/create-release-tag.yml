@@ -17,8 +17,6 @@ jobs:
         run: |
           RELEASE_NAME="DM Web Release"
           RELEASE_TAG="rel_$(date "+%y_%m_%d")_dm"
-          # Add other release variables as needed
-
           echo "RELEASE_NAME=$RELEASE_NAME" >> $GITHUB_ENV
           echo "RELEASE_TAG=$RELEASE_TAG" >> $GITHUB_ENV
 

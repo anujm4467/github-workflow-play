@@ -1,16 +1,15 @@
 name: Trigger Generate Change Log
 
 on:
-  workflow_run:
-    workflows: ['Create Release Tag']
+  repository_dispatch:
     types:
-      - completed
+      - create-release-tag
 
 jobs:
   trigger-generate-change-log:
     runs-on: ubuntu-latest
     steps:
-      - name: Debug Event Payload
+      - name: Check Payload
         run: |
           echo "Event payload: $GITHUB_EVENT_PATH"
           cat $GITHUB_EVENT_PATH
@@ -21,16 +20,9 @@ jobs:
           github-token: ${{ secrets.MY_PROJECT_TOKEN }}
           script: |
             try {
-              // Check if github.context is defined
-              if (!github.context) {
-                console.log("GitHub context is undefined. Exiting.");
-                return;
-              }
+              // Extract necessary information from the payload
+              const workflowRunID = github.context.payload.workflow_run.id;
 
-              // Fetch the workflow run ID from the completed workflow
-              const workflowRunID = github.context?.payload?.workflow_run?.id;
-
-              // Check if workflowRunID is defined
               if (!workflowRunID) {
                 console.log("Workflow run ID not found. Exiting.", github.context.payload);
                 return;
@@ -38,8 +30,8 @@ jobs:
 
               // Trigger the Generate Change Log workflow
               const response = await github.actions.createWorkflowDispatch({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
+                owner: 'anujm4467', // Change to your repository owner
+                repo: 'github-workflow-play', // Change to your repository name
                 workflow_id: 'generate-change-log.yml', // Adjust the workflow filename
                 ref: 'main', // Change to your branch name
                 inputs: {
