@@ -1,0 +1,27 @@
+name: Generate Change Log
+
+on:
+  workflow_call:
+    inputs:
+      workflow_run_id:
+        type: string
+        required: true
+
+jobs:
+  generate-change-log:
+    runs-on: ubuntu-latest
+    env:
+      WORKFLOW_RUN_ID: ${{ inputs.workflow_run_id }}
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Generate Change Log
+        run: |
+          # Your script to generate the change log based on commit titles and hashes
+
+      - name: Upload Change Log
+        uses: actions/upload-artifact@v2
+        with:
+          name: change-log
+          path: ./change-log.txt
