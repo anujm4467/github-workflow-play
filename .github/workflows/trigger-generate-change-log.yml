@@ -10,6 +10,11 @@ jobs:
   trigger-generate-change-log:
     runs-on: ubuntu-latest
     steps:
+      - name: Debug Event Payload
+        run: |
+          echo "Event payload: $GITHUB_EVENT_PATH"
+          cat $GITHUB_EVENT_PATH
+
       - name: Trigger Generate Change Log
         uses: actions/github-script@v7
         with:
@@ -17,7 +22,7 @@ jobs:
           script: |
             try {
               // Fetch the workflow run ID from the completed workflow
-              const workflowRunID = github.context.payload?.workflow_run?.id;
+              const workflowRunID = github.context?.payload?.workflow_run?.id;
 
               if (!workflowRunID) {
                 console.log("Workflow run ID not found. Exiting.", github.context.payload);
