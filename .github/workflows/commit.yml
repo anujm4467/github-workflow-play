@@ -16,7 +16,7 @@ jobs:
           cat $GITHUB_EVENT_PATH
         if: github.event_name == 'push'
 
-      - name: Trigger Create Release Workflow
+      - name: Create new release & tag
         uses: actions/github-script@v6
         with:
           github-token: ${{ secrets.MY_PROJECT_TOKEN }}
