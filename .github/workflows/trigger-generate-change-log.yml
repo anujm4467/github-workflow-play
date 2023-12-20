@@ -21,7 +21,7 @@ jobs:
           script: |
             try {
               // Extract necessary information from the payload
-              const workflowRunID = github.context.payload.workflow_run.id;
+              const workflowRunID = github.context?.client_payload.workflow_run_id;
 
               if (!workflowRunID) {
                 console.log("Workflow run ID not found. Exiting.", github.context.payload);
