@@ -16,20 +16,27 @@ jobs:
           cat $GITHUB_EVENT_PATH
         if: github.event_name == 'push'
 
+      - name: Debug GitHub Token
+        run: |
+          echo "GitHub Token: ${{ secrets.MY_PROJECT_TOKEN }}"
+
       - name: Trigger Create Release Workflow
-        uses: actions/github-script@v6
+        uses: actions/github-script@v7
         with:
           github-token: ${{ secrets.MY_PROJECT_TOKEN }}
           script: |
-            const { data: workflows } = await github.rest.actions.listRepoWorkflows({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-            });
+            try {
+              const { data: workflows } = await github.rest.actions.listRepoWorkflows({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+              });
 
-            const releaseWorkflow = workflows.workflows.find(workflow => workflow.name === 'Create new release & tag');
+              console.log("Workflows:", workflows);
 
-            if (releaseWorkflow) {
-              try {
+              const releaseWorkflow = workflows.workflows.find(workflow => workflow.name === 'Create new release & tag');
+
+              if (releaseWorkflow) {
+                console.log("Found workflow:", releaseWorkflow);
                 const { data: run } = await github.rest.actions.createWorkflowDispatch({
                   owner: context.repo.owner,
                   repo: context.repo.repo,
@@ -37,9 +44,9 @@ jobs:
                 });
 
                 console.log(`Triggered workflow run: ${run.id}`);
-              } catch (error) {
-                core.setFailed(`Failed to trigger workflow: ${error.message}`);
+              } else {
+                core.setFailed('Release workflow not found.');
               }
-            } else {
-              core.setFailed('Release workflow not found.');
+            } catch (error) {
+              core.setFailed(`Failed to trigger workflow: ${error.message}`);
             }
