@@ -32,7 +32,7 @@ jobs:
               if (users.length > 0) {
                 return users.join(", ");
               } else {
-                const errorMsg = "The build process hasn't been approved yet." + errorMsg;
+                const errorMsg = "The build process hasn't been approved yet." + result;
                 throw new Error(errorMsg);
               }
             } catch (error) {
