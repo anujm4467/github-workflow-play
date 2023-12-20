@@ -26,8 +26,8 @@ jobs:
 
       - name: Set release variables
         run: |
-          RELEASE_NAME="DM Web Release"
-          RELEASE_TAG="rel_$(date "+%y_%m_%d_12")_dm"
+          RELEASE_NAME="DM Web Release "$(date "+%m/%d/%Y %H:%M:%S")
+          RELEASE_TAG="rel_"$(date "+%y_%m_%d")"_dm"
           WORKFLOW_URL="https://github.com/${GITHUB_REPOSITORY}/actions/runs/${WORKFLOW_RUN_ID}"
           WORKFLOW_TITLE="🚀 Deploy Action: ${WORKFLOW_URL}"
           echo "RELEASE_NAME=$RELEASE_NAME" >> $GITHUB_ENV
