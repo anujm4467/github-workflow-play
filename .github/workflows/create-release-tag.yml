@@ -15,7 +15,6 @@ jobs:
 
       - name: Generate Change Log
         run: |
-          # Your script to generate the change log based on commit titles and hashes
           echo "Your change log content" > change-log.txt
 
       - name: Upload Change Log
