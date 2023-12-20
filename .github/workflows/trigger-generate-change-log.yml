@@ -23,8 +23,8 @@ jobs:
               const response = await github.actions.createWorkflowDispatch({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
-                workflow_id: 'generate-change-log.yml', // Adjust the workflow filename
-                ref: 'main', // Change to your branch name
+                workflow_id: 'change-log.yml', 
+                ref: 'main', 
                 inputs: {
                   workflow_run_id: workflowRunID.toString(),
                 },
