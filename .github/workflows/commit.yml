@@ -1,0 +1,53 @@
+name: Trigger Release Workflow on Commit
+
+on:
+  push:
+    branches:
+      - main # Change this to the branch you want to trigger the workflow on
+
+jobs:
+  trigger-release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Debug Event Payload
+        run: |
+          echo "Push event payload: $GITHUB_EVENT_PATH"
+          cat $GITHUB_EVENT_PATH
+        if: github.event_name == 'push'
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Trigger Create Release Workflow
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const { data: workflows } = await github.rest.actions.listRepoWorkflows({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+            });
+
+            const releaseWorkflow = workflows.workflows.find(workflow => workflow.name === 'Create new release & tag');
+
+            if (releaseWorkflow) {
+              try {
+                const { data: run } = await github.rest.actions.createWorkflowDispatch({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  workflow_id: releaseWorkflow.id,
+                });
+
+                console.log(`Triggered workflow run: ${run.id}`);
+              } catch (error) {
+                core.setFailed(`Failed to trigger workflow: ${error.message}`);
+              }
+            } else {
+              core.setFailed('Release workflow not found.');
+            }
