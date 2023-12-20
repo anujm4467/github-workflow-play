@@ -21,10 +21,10 @@ jobs:
           script: |
             try {
               // Extract necessary information from the payload
-              const workflowRunID = github.context?.client_payload.workflow_run_id;
+              const workflowRunID = github.context?.client_payload?.workflow_run_id;
 
               if (!workflowRunID) {
-                console.log("Workflow run ID not found. Exiting.", github.context.payload);
+                console.log("Workflow run ID not found. Exiting.", github.context);
                 return;
               }
 
@@ -32,7 +32,7 @@ jobs:
               const response = await github.actions.createWorkflowDispatch({
                 owner: 'anujm4467', // Change to your repository owner
                 repo: 'github-workflow-play', // Change to your repository name
-                workflow_id: 'generate-change-log.yml', // Adjust the workflow filename
+                workflow_id: 'change-log.yml', // Adjust the workflow filename
                 ref: 'main', // Change to your branch name
                 inputs: {
                   workflow_run_id: workflowRunID.toString(),
