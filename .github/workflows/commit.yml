@@ -41,6 +41,7 @@ jobs:
                   owner: context.repo.owner,
                   repo: context.repo.repo,
                   workflow_id: releaseWorkflow.id,
+                  ref: 'main', // Specify the branch to trigger the workflow on
                 });
 
                 console.log(`Triggered workflow run: ${run.id}`);
