@@ -13,32 +13,6 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v3
 
-      - name: Get Approvals data
-        uses: actions/github-script@v7
-        id: get-approvals-data
-        with:
-          github-token: ${{ secrets.MY_PROJECT_TOKEN }}
-          result-encoding: string
-          script: |
-            const [owner, repo] = process.env.GITHUB_REPOSITORY.split('/');
-            try {
-              const result = await github.rest.actions.getReviewsForRun({
-                run_id: process.env.WORKFLOW_RUN_ID,
-                owner: owner,
-                repo: repo,
-              });
-
-              const users = [...new Set(result.data.map(({ user }) => user.login))];
-              if (users.length > 0) {
-                return users.join(", ");
-              } else {
-                const errorMsg = "The build process hasn't been approved yet." + JSON.stringify(result);
-                throw new Error(errorMsg);
-              }
-            } catch (error) {
-              core.setFailed(error.message);
-            }
-
       - name: Generate Change Log
         run: |
           # Your script to generate the change log based on commit titles and hashes
@@ -54,6 +28,8 @@ jobs:
         run: |
           RELEASE_NAME="DM Web Release"
           RELEASE_TAG="rel_$(date "+%y_%m_%d_12")_dm"
+          WORKFLOW_URL="https://github.com/${GITHUB_REPOSITORY}/actions/runs/${WORKFLOW_RUN_ID}"
+          WORKFLOW_TITLE="🚀 Deploy Action: ${WORKFLOW_URL}"
           echo "RELEASE_NAME=$RELEASE_NAME" >> $GITHUB_ENV
           echo "RELEASE_TAG=$RELEASE_TAG" >> $GITHUB_ENV
 
@@ -63,6 +39,7 @@ jobs:
           github-token: ${{ secrets.MY_PROJECT_TOKEN }}
           script: |
             const body = [
+              process.env.WORKFLOW_TITLE,
               process.env.RELEASE_NAME,
               'Job initiated at ' + new Date().toLocaleString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' }).replace(/[,:]/g, (match) => match === ',' ? ' ' : ':'),
             ];
