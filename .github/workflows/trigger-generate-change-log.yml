@@ -21,9 +21,16 @@ jobs:
           github-token: ${{ secrets.MY_PROJECT_TOKEN }}
           script: |
             try {
+              // Check if github.context is defined
+              if (!github.context) {
+                console.log("GitHub context is undefined. Exiting.");
+                return;
+              }
+
               // Fetch the workflow run ID from the completed workflow
               const workflowRunID = github.context?.payload?.workflow_run?.id;
 
+              // Check if workflowRunID is defined
               if (!workflowRunID) {
                 console.log("Workflow run ID not found. Exiting.", github.context.payload);
                 return;
