@@ -1,0 +1,124 @@
+name: Create new release & tag
+
+on:
+  workflow_call:
+    inputs:
+      workflow_run_id:
+        type: string
+        required: true
+
+jobs:
+  create-release-tag:
+    runs-on: ubuntu-latest
+    env:
+      WORKFLOW_RUN_ID: ${{ inputs.workflow_run_id }}
+    steps:
+      - uses: actions/checkout@v3
+      - name: 'Get Approvals data'
+        uses: 'actions/github-script@v6'
+        id: get-approvals-data
+        with:
+          github-token: '${{ github.token }}'
+          result-encoding: string
+          script: |
+            const [owner, repo] = process.env.GITHUB_REPOSITORY.split('/')
+            try {
+                const result = await github.rest.actions.getReviewsForRun({
+                    run_id: process.env.WORKFLOW_RUN_ID,
+                    owner: owner,
+                    repo: repo,
+                });
+
+                const users = [...new Set(result.data.map( ({user}) => user.login ))];
+                if(users.length > 0){
+                    return users.join(", ");
+                } else {
+                  const errorMsg = "The build process hasn't been approved yet.";
+                  throw new Error(errorMsg);
+                }
+            } catch(error) {
+              core.setFailed(error.message);
+            }
+
+      - name: 'Get Build & QA jobs data'
+        uses: 'actions/github-script@v6'
+        id: get-jobs-data
+        with:
+          github-token: '${{ github.token }}'
+          result-encoding: json
+          script: |
+            const [owner, repo] = process.env.GITHUB_REPOSITORY.split('/')
+            const jobName = "build_dm_api";
+            const QAName = "run-e2e-tests";
+
+            try {
+              const result = await github.rest.actions.listJobsForWorkflowRun({
+                run_id: process.env.WORKFLOW_RUN_ID,
+                owner: owner,
+                repo: repo,
+              });
+
+              const buildJob = result.data.jobs.find((job) => job?.name === jobName);
+              const qaJob = result.data.jobs.find((job) => job?.name === QAName);
+
+              if(!qaJob) {
+                console.log("QA Test suite wasn't executed.")
+              }
+
+              return {
+                build_start_time: buildJob.started_at,
+                qa_link: qaJob.html_url || "QA Test suite wasn't executed yet."
+              }
+
+            } catch (error) {
+              core.setFailed(error.message);
+            }
+
+      - name: 'Set release variables'
+        run: |
+          RELEASE_DATE=$(echo '${{ steps.get-jobs-data.outputs.result }}' | jq '.build_start_time' -r )
+          TESTS_URL=$(echo '${{ steps.get-jobs-data.outputs.result }}' | jq '.qa_link' -r )
+          APPROVED_BY="${{ steps.get-approvals-data.outputs.result }}"
+          RELEASE_NAME="DM Web Release "$(date "+%m/%d/%Y %H:%M:%S")
+          RELEASE_TAG="rel_"$(date "+%y_%m_%d")"_dm"
+          WORKFLOW_URL="https://github.com/"${{ github.repository }}"/actions/runs/"$WORKFLOW_RUN_ID
+          WORKFLOW_TITLE="🚀 Deploy Action: "$WORKFLOW_URL
+          TESTS_TITLE="🧪 QA Smoke Tests: "$TESTS_URL
+          SIGNED_BY="Signed by: $APPROVED_BY"
+          RELEASED_AT=$(date -d $RELEASE_DATE "+%m/%d/%Y %H:%M:%S")
+
+          echo "RELEASE_NAME=$RELEASE_NAME" >> $GITHUB_ENV
+          echo "RELEASE_TAG=$RELEASE_TAG" >> $GITHUB_ENV
+          echo "RELEASE_BODY=$RELEASE_BODY" >> $GITHUB_ENV
+          echo "SIGNED_BY=$SIGNED_BY" >> $GITHUB_ENV
+          echo "WORKFLOW_TITLE=$WORKFLOW_TITLE" >> $GITHUB_ENV
+          echo "TESTS_TITLE=$TESTS_TITLE" >> $GITHUB_ENV
+          echo "RELEASED_AT=$RELEASED_AT" >> $GITHUB_ENV
+
+      - name: Create release & tag
+        uses: 'actions/github-script@v6'
+        with:
+          github-token: '${{ github.token }}'
+          script: |
+
+            const body = [
+              process.env.TESTS_TITLE,
+              process.env.WORKFLOW_TITLE,
+              Job initiated at ${process.env.RELEASED_AT},
+              process.env.SIGNED_BY,
+            ];
+
+            try {
+              await github.rest.repos.createRelease({
+                draft: false,
+                generate_release_notes: true,
+                name: process.env.RELEASE_NAME,
+                owner: context.repo.owner,
+                prerelease: false,
+                repo: context.repo.repo,
+                tag_name: process.env.RELEASE_TAG,
+                body: body.join("\r\n")
+              });
+            } catch (error) {
+              core.setFailed(error.message);
+            }
