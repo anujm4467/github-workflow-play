@@ -23,11 +23,10 @@ jobs:
           name: change-log
           path: ./change-log.txt
 
-      - name: Download Test URL
-        uses: actions/download-artifact@v2
-        with:
-          name: test-url
-          path: ${{ github.workspace }}
+      - name: Read Test URL
+        run: |
+          TEST_URL=$(cat ${{ github.workspace }}/test-url.txt)
+          echo "Test URL: $TEST_URL"
 
       - name: Set release variables
         run: |
