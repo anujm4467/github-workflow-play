@@ -1,0 +1,42 @@
+name: Unit Tests
+
+on:
+  push:
+    branches:
+      - '*'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 14
+
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Run Unit Tests
+        run: |
+          test_report=$(npm run test --silent)
+          echo "Test Report: $test_report"
+          echo "::set-output name=test_report::$test_report"
+
+      - name: Upload Test Report
+        uses: actions/upload-artifact@v2
+        with:
+          name: test-report
+          path: ${{ runner.workspace }}/test-report.txt
+
+      - name: Set URL variable
+        run: echo "TEST_URL=https://dubtest.idealite.in" > ${{ runner.workspace }}/test-url.txt
+      - name: Upload URL
+        uses: actions/upload-artifact@v2
+        with:
+          name: test-url
+          path: ${{ runner.workspace }}/test-url.txt

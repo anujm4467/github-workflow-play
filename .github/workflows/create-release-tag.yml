@@ -23,9 +23,16 @@ jobs:
           name: change-log
           path: ./change-log.txt
 
+      - name: Download Test URL
+        uses: actions/download-artifact@v2
+        with:
+          name: test-url
+          path: ${{ github.workspace }}
+
       - name: Set release variables
         run: |
           RELEASE_NAME="Web Release "$(date "+%m/%d/%Y %H:%M:%S")
+          echo "Test URL: $TEST_URL"
           RELEASE_TAG="rel_"$(date "+%y_%m_%d")"_dm"
           WORKFLOW_URL="https://github.com/${GITHUB_REPOSITORY}/actions/runs/${WORKFLOW_RUN_ID}"
           WORKFLOW_TITLE="🚀 Deploy Action: ${WORKFLOW_URL}"
