@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kube-test-node
+  labels:
+    app: kube-test-node
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: kube-test-node
+  template:
+    metadata:
+      labels:
+        app: kube-test-node
+    spec:
+      containers:
+        - name: kube-test-node
+          image: anujmdev/kube-test-node:0.0.1
+          ports:
+            - containerPort: 3000
+          resources:
+            limits:
+              memory: "256Mi"   # Set the maximum memory usage
+              cpu: "100m"       # Set the maximum CPU usage (100m = 0.1 CPU cores)
+            requests:
+              memory: "128Mi"   # Set the initial memory request
+              cpu: "50m"        # Set the initial CPU request (50m = 0.05 CPU cores)
+          envFrom:  # Reference the ConfigMap here
+            - configMapRef:
+                name: kube-test-node-config
+

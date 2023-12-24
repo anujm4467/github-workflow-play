@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kube-test-node-config
+data:
+  IMAGE_VERSION: "new-version"
+  PORT: "3000"

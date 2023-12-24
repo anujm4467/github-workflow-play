@@ -1,20 +1,23 @@
-name: Unit Tests
+name: Workflow1
 
 on:
   push:
     branches:
-      - '*'
+      - main
 
 jobs:
-  test:
+  build:
     runs-on: ubuntu-latest
 
+    outputs:
+      matrix:
+        include:
+          my_data: Hello from Workflow1
+
     steps:
-      - name: Checkout Repository
+      - name: Set up Git repository
         uses: actions/checkout@v2
 
-      - name: Set URL variable
-        run: echo "TEST_URL=https://dubtest.idealite.in" >> $GITHUB_ENV
-
-      - name: Display URL
-        run: echo "Test URL is $TEST_URL"
+      - name: Set outputs
+        id: set_outputs
+        run: echo "my_data=${{ matrix.my_data }}" >> $GITHUB_ENV
